@@ -1,17 +1,22 @@
+// Получение данных о товарах из localStorage
 let goods = JSON.parse(localStorage.getItem('goods')) || [];
 
+// Запись данных в localStorage
 const setLocalStorage = (data) => {
     localStorage.setItem('goods', JSON.stringify(data));
 };
 
-let myModal = new bootstrap.Modal(document.getElementById('exampleModal'));
 // Модальное окно via Bootstrap
+let myModal = new bootstrap.Modal(document.getElementById('exampleModal'));
+
+// --- Поиск через List.js ---
 let options = { // настройки List.js
     valueNames: ['name', 'price'] // задаются имена для значений поиска в виде их классов
 };
+
 let userList;
 
-console.log(new Date())
+// ToDo переделать метод присвоения ID карточке товара через new Date()
 
 const name = document.querySelector('#good_name');
 const price = document.querySelector('#good_price');
@@ -23,26 +28,7 @@ const totalPrice = document.querySelector('.price_result');
 
 const addNewButton = document.querySelector('button.add_new');
 
-addNewButton.addEventListener('click', () => {
-    if (name.value && price.value && count.value) {
-        goods.push(['good_'+goods.length, name.value, price.value, count.value, 0, 0, 0]);
-
-        name.value = '';
-        price.value = '';
-        count.value = '1';
-
-        setLocalStorage(goods);
-        update_goods();
-
-        myModal.hide();
-    } else {
-        Swal.fire({
-            icon: "error",
-            title: "Ошибка",
-            text: "Пожалуйста, заполните все поля!",
-        })
-    }
-})
+// --- Скрипты динамической отрисовки товаров ---
 
 const update_goods = () => {
     let result_price = 0; // общая стоимость товаров в корзине
@@ -55,7 +41,7 @@ const update_goods = () => {
         for (let i = 0; i < goods.length; i++) {
             tbodyList.insertAdjacentHTML('beforeend',
                 `
-                <tr class="alight-middle">
+                <tr class="align-middle">
                     <td>${i+1}</td>
                     <td class="name">${goods[i][1]}</td>
                     <td class="price">${goods[i][2]}</td>
@@ -72,7 +58,7 @@ const update_goods = () => {
 
                 tbodyCart.insertAdjacentHTML('beforeend',
                     `
-                    <tr class="alight-middle">
+                    <tr class="align-middle">
                         <td>${i+1}</td>
                         <td class="price_name">${goods[i][1]}</td>
                         <td class="price_one">${goods[i][2]}</td>
@@ -97,6 +83,31 @@ const update_goods = () => {
     totalPrice.innerHTML = result_price + ' &#8381;';
 }
 
+// --- Отслеживание кликов по кнопке "Добавить новый товар" ---
+
+addNewButton.addEventListener('click', () => {
+    if (name.value && price.value && count.value) {
+        goods.push(['good_'+goods.length, name.value, price.value, count.value, 0, 0, 0]);
+
+        name.value = '';
+        price.value = '';
+        count.value = '1';
+
+        setLocalStorage(goods);
+        update_goods();
+
+        myModal.hide();
+    } else {
+        Swal.fire({
+            icon: "error",
+            title: "Ошибка",
+            text: "Пожалуйста, заполните все поля!",
+        })
+    }
+})
+
+// --- Отслеживание кликов по кнопам "Удалить товар из списка" ---
+
 tbodyList.addEventListener('click', (e) => {
     if (!e.target.dataset.delete) {
         return;
@@ -118,7 +129,7 @@ tbodyList.addEventListener('click', (e) => {
                 }
             }
 
-            setLocalStorage(goods)
+            setLocalStorage(goods);
             update_goods();
 
             Swal.fire (
@@ -128,6 +139,40 @@ tbodyList.addEventListener('click', (e) => {
             )
         }
     })
+})
+
+// --- Отслеживание кликов по кнопкам "Добавить товар в корзину" ---
+
+tbodyList.addEventListener('click', (e) => {
+    if (!e.target.dataset.goods) {
+        return;
+    }
+
+    for (let i = 0; i < goods.length; i++) {
+        if (goods[i][3] > 0 && goods[i][0] === e.target.dataset.goods) {
+            goods[i].splice(3, 1, goods[i][3] - 1); // уменьшит количество товаров в магазине на 1
+            goods[i].splice(4, 1, goods[i][4] + 1); // увеличит количество товаров в корзине на 1
+            setLocalStorage(goods);
+            update_goods();
+        }
+    }
+})
+
+// --- Отслеживание кликов по кнопкам "Удалить товар из корзины" ---
+
+tbodyCart.addEventListener('click', (e) => {
+    if (!e.target.dataset.delete) {
+        return;
+    }
+
+    for (let i = 0; i < goods.length; i++) {
+        if (goods[i][4] > 0 && goods[i][0] === e.target.dataset.delete) {
+            goods[i].splice(3, 1, goods[i][3] + 1); // увеличит количество товаров в магазине на 1
+            goods[i].splice(4, 1, goods[i][4] - 1); // уменьшит количество товаров в корзине на 1
+            setLocalStorage(goods);
+            update_goods();
+        }
+    }
 })
 
 update_goods();
