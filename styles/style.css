@@ -48,7 +48,7 @@ button.good_delete {
   display: flex;
   align-items: center;
   height: 50px;
-  margin-top: 15px;
+  margin: 10px;
 }
 .menu_left {
   justify-content: flex-start;
@@ -72,8 +72,11 @@ th {
 tr {
   height: 30px;
 }
-tr:nth-child(1) {
-  background-color: #ffffff;
+tr:nth-child(even) {
+  background-color: #f1f1f1;
+}
+tr td {
+  background-color: transparent !important;
 }
 
 tr {

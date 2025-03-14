@@ -6,8 +6,12 @@ Practice project
 
 - HTML
 - SCSS / Bootstrap
-- JavaScript / sweetalert2 / list.js
+- JavaScript / Bootstrap / sweetalert2 / list.js
 
 ## Реализованный функционал:
 
-- WIP
+- Добавление товаров в JSON
+- Хранение списка товаров в localStorage
+- Динамическая отрисовка списка товаров на странице
+- Красивые сообщения от сайта via sweetalert2
+- Модальное окно добавления товара via Bootstrap
