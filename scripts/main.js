@@ -26,7 +26,8 @@ let options = { // настройки List.js
     valueNames: ['name', 'price'] // задаются имена для значений поиска в виде их классов
 };
 
-let userList;
+let userList; // для фильтров по поиску
+let sort = []; // для сортировки таблиц
 
 // ToDo переделать метод присвоения ID карточке товара через new Date()
 
@@ -91,22 +92,53 @@ const sortTable = (colNum, type, id) => {
     let elem = document.getElementById(id);
     let tbody = elem.querySelector('tbody');
     let rowsArray = Array.from(tbody.rows);
-    let compare
-    switch (type) {
-        case 'number': // отсылается к data-type="number" в HTML
-            compare = (rowA, rowB) => { // сортировка по возрастанию чисел
-                return rowA.cells[colNum].innerHTML - rowB.cells[colNum].innerHTML;
-            }
-            break;
-        case 'string': // отсылается к data-type="string" в HTML
-            compare = (rowA, rowB) => { // сортировка по алфавиту
-                return rowA.cells[colNum].innerHTML > rowB.cells[colNum].innerHTML ? 1 : -1;
-            }
-            break;
+    let compare;
+
+    const sortAscending = (type) => {
+        switch (type) {
+            case 'number': // отсылается к data-type="number" в HTML
+                compare = function (rowA, rowB) { // сортировка по возрастанию чисел
+                    return rowA.cells[colNum].innerHTML - rowB.cells[colNum].innerHTML
+                }
+                break
+            case 'string': // отсылается к data-type="string" в HTML
+                compare = function (rowA, rowB) { // сортировка по алфавиту
+                    return rowA.cells[colNum].innerHTML > rowB.cells[colNum].innerHTML ? 1 : -1
+                }
+                break
+        }
+        rowsArray.sort(compare)
+        tbody.append(...rowsArray)
     }
 
-    rowsArray.sort(compare);
-    tbody.append(...rowsArray);
+    if (sort[0] === colNum) { // Если по колонке уже отсортировано:
+        if (sort[1] === 'desc') {
+            // Если отсортировано по убыванию, сортируем по возрастанию
+            sortAscending(type);
+            sort[1] = 'asc'
+        } else { // В обратную сторону
+            switch (type) {
+                case 'number':
+                    compare = function (rowA, rowB) {
+                        return rowB.cells[colNum].innerHTML - rowA.cells[colNum].innerHTML
+                    }
+                    break
+                case 'string':
+                    compare = function (rowA, rowB) {
+                        return rowA.cells[colNum].innerHTML > rowB.cells[colNum].innerHTML ? -1 : 1
+                    }
+                    break
+            }
+            rowsArray.sort(compare)
+            tbody.append(...rowsArray)
+            sort[1] = 'desc'
+        }
+    } else { // Если по колонке сейчас не отсортировано, то сортируем по возрастанию
+        sortAscending(type);
+
+        sort[0] = colNum
+        sort[1] = 'asc'
+    }
 }
 
 // --- Отслеживание кликов по кнопке "Добавить новый товар" ---

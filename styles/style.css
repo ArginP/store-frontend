@@ -68,6 +68,9 @@ th {
   padding: 15px;
   text-align: center;
 }
+th span {
+  font-weight: 100;
+}
 
 tr {
   height: 30px;
