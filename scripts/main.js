@@ -201,6 +201,29 @@ tbodyCart.addEventListener('click', (e) => {
     }
 })
 
+// --- Отслеживание ввода в поле "Скидка" в корзине ---
+
+tbodyCart.addEventListener('input', (e) => {
+    if (!e.target.dataset.goodid) {
+        return;
+    }
+
+    for (let i = 0; i < goods.length; i++) { // ToDo debounce
+        if (goods[i][0] === e.target.dataset.goodid) {
+            goods[i][5] = e.target.value;
+            goods[i][6] = goods[i][4] * goods[i][2] - goods[i][4] * goods[i][2] * goods[i][5] * 0.01;
+
+            setLocalStorage(goods);
+            update_goods(); // обновится dom-дерево, и слетит фокус с окна ввода скидки
+
+            // найдет input в который мы вводим
+            let input = document.querySelector(`[data-goodid="${goods[i][0]}"]`);
+            input.focus(); // возьмет его в фокус
+            input.selectionStart = input.value.length; // поставит курсор в конец введенных значений
+        }
+    }
+})
+
 // --- Отслеживание кликов по заголовкам таблиц для сортировки ---
 
 table1.onclick = (e) => {
