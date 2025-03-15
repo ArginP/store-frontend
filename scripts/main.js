@@ -1,3 +1,15 @@
+// --- HTML элементы страницы ---
+
+const name = document.querySelector('#good_name');
+const price = document.querySelector('#good_price');
+const count = document.querySelector('#good_count');
+
+const tbodyList = document.querySelector('tbody.list');
+const tbodyCart = document.querySelector('tbody.cart');
+const totalPrice = document.querySelector('.price_result');
+
+const addNewButton = document.querySelector('button.add_new');
+
 // Получение данных о товарах из localStorage
 let goods = JSON.parse(localStorage.getItem('goods')) || [];
 
@@ -17,16 +29,6 @@ let options = { // настройки List.js
 let userList;
 
 // ToDo переделать метод присвоения ID карточке товара через new Date()
-
-const name = document.querySelector('#good_name');
-const price = document.querySelector('#good_price');
-const count = document.querySelector('#good_count');
-
-const tbodyList = document.querySelector('tbody.list');
-const tbodyCart = document.querySelector('tbody.cart');
-const totalPrice = document.querySelector('.price_result');
-
-const addNewButton = document.querySelector('button.add_new');
 
 // --- Скрипты динамической отрисовки товаров ---
 
@@ -81,6 +83,30 @@ const update_goods = () => {
     }
 
     totalPrice.innerHTML = result_price + ' &#8381;';
+}
+
+// --- Сортировка таблиц ---
+
+const sortTable = (colNum, type, id) => {
+    let elem = document.getElementById(id);
+    let tbody = elem.querySelector('tbody');
+    let rowsArray = Array.from(tbody.rows);
+    let compare
+    switch (type) {
+        case 'number': // отсылается к data-type="number" в HTML
+            compare = (rowA, rowB) => { // сортировка по возрастанию чисел
+                return rowA.cells[colNum].innerHTML - rowB.cells[colNum].innerHTML;
+            }
+            break;
+        case 'string': // отсылается к data-type="string" в HTML
+            compare = (rowA, rowB) => { // сортировка по алфавиту
+                return rowA.cells[colNum].innerHTML > rowB.cells[colNum].innerHTML ? 1 : -1;
+            }
+            break;
+    }
+
+    rowsArray.sort(compare);
+    tbody.append(...rowsArray);
 }
 
 // --- Отслеживание кликов по кнопке "Добавить новый товар" ---
@@ -174,5 +200,23 @@ tbodyCart.addEventListener('click', (e) => {
         }
     }
 })
+
+// --- Отслеживание кликов по заголовкам таблиц для сортировки ---
+
+table1.onclick = (e) => {
+    if (e.target.tagName !== 'TH') return; // если клик не по элементу заголовка таблицы, то ничего не делать
+    let th = e.target;
+    sortTable(th.cellIndex, th.dataset.type, 'table1');
+    // передаваемые атрибуты: HTMLTableCellElement (позиция ячейки в столбце таблицы),
+    // тип данных из data-type="..." в HTML и id
+}
+
+table2.onclick = (e) => {
+    if (e.target.tagName !== 'TH') return;
+    let th = e.target;
+    sortTable(th.cellIndex, th.dataset.type, 'table2');
+    // передаваемые атрибуты: HTMLTableCellElement (позиция ячейки в столбце таблицы),
+    // тип данных из data-type="..." в HTML и id
+}
 
 update_goods();
