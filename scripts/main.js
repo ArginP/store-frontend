@@ -26,7 +26,7 @@ let options = { // настройки List.js
     valueNames: ['name', 'price'] // задаются имена для значений поиска в виде их классов
 };
 
-let userList; // для фильтров по поиску
+let userList; // для фильтров по поиску (List.js)
 let sort = []; // для сортировки таблиц
 
 // ToDo переделать метод присвоения ID карточке товара через new Date()
@@ -66,8 +66,14 @@ const update_goods = () => {
                         <td class="price_name">${goods[i][1]}</td>
                         <td class="price_one">${goods[i][2]}</td>
                         <td class="price_count">${goods[i][4]}</td>
-                        <td class="price_discount"><input type="text" data-goodid="${goods[i][0]}" value="${goods[i][5]}" min="0" max="100"></td>
-                        <td>${goods[i][6]}</td>
+                        <td class="price_discount">
+                            <input type="text" 
+                                oninput="this.value = this.value.replace(/[^0-9.]/g, '');" 
+                                onfocus="this.select();"
+                                data-goodid="${goods[i][0]}" value="${goods[i][5]}" 
+                                min="0" max="100">
+                            </td>
+                        <td>${goods[i][6].toFixed(2)}</td>
                         <td><button class="good_delete btn btn-danger" data-delete="${goods[i][0]}">&#10006;</button></td>
                     </tr>
                     `
@@ -83,7 +89,7 @@ const update_goods = () => {
         table2.hidden = true;
     }
 
-    totalPrice.innerHTML = result_price + ' &#8381;';
+    totalPrice.innerHTML = result_price.toFixed(2) + ' &#8381;'; // Общая сумма товаров в корзине, округленная до 2
 }
 
 // --- Сортировка таблиц ---
@@ -239,10 +245,14 @@ tbodyCart.addEventListener('input', (e) => {
     if (!e.target.dataset.goodid) {
         return;
     }
+    let discount = e.target.value;
+
+    // следит за тем, чтобы значение скидки было в диапазоне от 0 до 100
+    if (discount > 100) discount = 100;
 
     for (let i = 0; i < goods.length; i++) { // ToDo debounce
         if (goods[i][0] === e.target.dataset.goodid) {
-            goods[i][5] = e.target.value;
+            goods[i][5] = discount;
             goods[i][6] = goods[i][4] * goods[i][2] - goods[i][4] * goods[i][2] * goods[i][5] * 0.01;
 
             setLocalStorage(goods);
