@@ -96,10 +96,16 @@
                     <input type="text" id="good_name" class="form-control mb-3" maxlength="40">
 
                     <label for="good_price" class="form-label">Цена</label>
-                    <input type="text" id="good_price" class="form-control mb-3">
+                    <input
+                            type="text" id="good_price" class="form-control mb-3"
+                            oninput="this.value = this.value.replace(/[^0-9.]/g, '');" >
 
                     <label for="good_count" class="form-label">Количество</label>
-                    <input type="text" id="good_count" class="form-control mb-3" minlength="1" value="1">
+                    <input
+                            type="text" id="good_count" class="form-control mb-3"
+                            minlength="1" value="1"
+                            oninput="this.value = this.value.replace(/[^0-9.]/g, '');"
+                            onfocus="this.select();">
 
                     <button type="submit" class="add_new btn btn-success">Сохранить</button>
                 </div>

@@ -1,5 +1,7 @@
 // --- HTML элементы страницы ---
 
+const searchBox = document.querySelector('#search_box');
+
 const name = document.querySelector('#good_name');
 const price = document.querySelector('#good_price');
 const count = document.querySelector('#good_count');
@@ -33,7 +35,7 @@ let sort = []; // для сортировки таблиц
 
 // --- Скрипты динамической отрисовки товаров ---
 
-const update_goods = () => {
+const updateGoods = () => {
     let result_price = 0; // общая стоимость товаров в корзине
     tbodyList.innerHTML = '';
     tbodyCart.innerHTML = '';
@@ -84,6 +86,8 @@ const update_goods = () => {
     userList = new List('goods', options); // инициализируем список для поиска List.js
         // Ищет раздел по id 'goods' и принимает настройки, заданные в начале модуля
 
+    searchBox.value = '';
+
     } else { // если список товаров пуст
         table1.hidden = true;
         table2.hidden = true;
@@ -117,12 +121,13 @@ const sortTable = (colNum, type, id) => {
         tbody.append(...rowsArray)
     }
 
+
     if (sort[0] === colNum) { // Если по колонке уже отсортировано:
         if (sort[1] === 'desc') {
-            // Если отсортировано по убыванию, сортируем по возрастанию
+            // Если отсортировано по убыванию, сортирует по возрастанию
             sortAscending(type);
             sort[1] = 'asc'
-        } else { // В обратную сторону
+        } else { // Сортирует по убыванию
             switch (type) {
                 case 'number':
                     compare = function (rowA, rowB) {
@@ -158,7 +163,7 @@ addNewButton.addEventListener('click', () => {
         count.value = '1';
 
         setLocalStorage(goods);
-        update_goods();
+        updateGoods();
 
         myModal.hide();
     } else {
@@ -194,7 +199,7 @@ tbodyList.addEventListener('click', (e) => {
             }
 
             setLocalStorage(goods);
-            update_goods();
+            updateGoods();
 
             Swal.fire (
                 "Удалено!",
@@ -217,7 +222,7 @@ tbodyList.addEventListener('click', (e) => {
             goods[i].splice(3, 1, goods[i][3] - 1); // уменьшит количество товаров в магазине на 1
             goods[i].splice(4, 1, goods[i][4] + 1); // увеличит количество товаров в корзине на 1
             setLocalStorage(goods);
-            update_goods();
+            updateGoods();
         }
     }
 })
@@ -234,7 +239,7 @@ tbodyCart.addEventListener('click', (e) => {
             goods[i].splice(3, 1, goods[i][3] + 1); // увеличит количество товаров в магазине на 1
             goods[i].splice(4, 1, goods[i][4] - 1); // уменьшит количество товаров в корзине на 1
             setLocalStorage(goods);
-            update_goods();
+            updateGoods();
         }
     }
 })
@@ -250,13 +255,13 @@ tbodyCart.addEventListener('input', (e) => {
     // следит за тем, чтобы значение скидки было в диапазоне от 0 до 100
     if (discount > 100) discount = 100;
 
-    for (let i = 0; i < goods.length; i++) { // ToDo debounce
+    for (let i = 0; i < goods.length; i++) {
         if (goods[i][0] === e.target.dataset.goodid) {
             goods[i][5] = discount;
             goods[i][6] = goods[i][4] * goods[i][2] - goods[i][4] * goods[i][2] * goods[i][5] * 0.01;
 
             setLocalStorage(goods);
-            update_goods(); // обновится dom-дерево, и слетит фокус с окна ввода скидки
+            updateGoods(); // обновится dom-дерево, и слетит фокус с окна ввода скидки
 
             // найдет input в который мы вводим
             let input = document.querySelector(`[data-goodid="${goods[i][0]}"]`);
@@ -284,4 +289,4 @@ table2.onclick = (e) => {
     // тип данных из data-type="..." в HTML и id
 }
 
-update_goods();
+updateGoods();
