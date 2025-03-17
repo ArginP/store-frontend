@@ -31,8 +31,6 @@ let options = { // настройки List.js
 let userList; // для фильтров по поиску (List.js)
 let sort = []; // для сортировки таблиц
 
-// ToDo переделать метод присвоения ID карточке товара через new Date()
-
 // --- Скрипты динамической отрисовки товаров ---
 
 const updateGoods = () => {
@@ -156,7 +154,7 @@ const sortTable = (colNum, type, id) => {
 
 addNewButton.addEventListener('click', () => {
     if (name.value && price.value && count.value) {
-        goods.push(['good_'+goods.length, name.value, price.value, count.value, 0, 0, 0]);
+        goods.push([`good_${Date.now()}_${goods.length}`, name.value, price.value, count.value, 0, 0, 0]);
 
         name.value = '';
         price.value = '';
