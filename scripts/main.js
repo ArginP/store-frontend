@@ -1,16 +1,18 @@
 // --- HTML элементы страницы ---
 
 const searchBox = document.querySelector('#search_box');
+const totalPrice = document.querySelector('.price_result');
+
+const tableLeft = document.querySelector('#table1');
+const tableRight = document.querySelector('#table2');
 
 const name = document.querySelector('#good_name');
 const price = document.querySelector('#good_price');
 const count = document.querySelector('#good_count');
+const addNewButton = document.querySelector('button.add_new');
 
 const tbodyList = document.querySelector('tbody.list');
 const tbodyCart = document.querySelector('tbody.cart');
-const totalPrice = document.querySelector('.price_result');
-
-const addNewButton = document.querySelector('button.add_new');
 
 // Получение данных о товарах из localStorage
 let goods = JSON.parse(localStorage.getItem('goods')) || [];
@@ -22,6 +24,13 @@ const setLocalStorage = (data) => {
 
 // Модальное окно via Bootstrap
 let myModal = new bootstrap.Modal(document.getElementById('exampleModal'));
+
+// Обработка события открытия модального окна Bootstrap
+const myModalEl = document.getElementById('exampleModal')
+myModalEl.addEventListener('shown.bs.modal', () => {
+    name.focus(); // первое окно ввода (название) попадает в фокус
+})
+
 
 // --- Поиск через List.js ---
 let options = { // настройки List.js
@@ -39,8 +48,8 @@ const updateGoods = () => {
     tbodyCart.innerHTML = '';
 
     if (goods.length) {
-        table1.hidden = false; // прямое обращение к элементу по его id
-        table2.hidden = false;
+        tableLeft.hidden = false;
+        tableRight.hidden = false;
         for (let i = 0; i < goods.length; i++) {
             tbodyList.insertAdjacentHTML('beforeend',
                 `
@@ -87,8 +96,8 @@ const updateGoods = () => {
     searchBox.value = '';
 
     } else { // если список товаров пуст
-        table1.hidden = true;
-        table2.hidden = true;
+        tableLeft.hidden = true;
+        tableRight.hidden = true;
     }
 
     totalPrice.innerHTML = result_price.toFixed(2) + ' &#8381;'; // Общая сумма товаров в корзине, округленная до 2
@@ -173,57 +182,50 @@ addNewButton.addEventListener('click', () => {
     }
 })
 
-// --- Отслеживание кликов по кнопам "Удалить товар из списка" ---
+// --- Отслеживание кликов по кнопам в списке товаров ---
 
 tbodyList.addEventListener('click', (e) => {
-    if (!e.target.dataset.delete) {
-        return;
-    }
-    Swal.fire({
-        title: 'Внимание!',
-        text: 'Вы действительно хотите удалить товар?',
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#3085d6',
-        cancelButtonColor: '#d33',
-        confirmButtonText: 'Да',
-        cancelButtonText: 'Отмена',
-    }).then((result) => {
-        if (result.isConfirmed) {
-            for (let i = 0; i < goods.length; i++) {
-                if (goods[i][0] === e.target.dataset.delete) {
-                    goods.splice(i, 1);
+    if (e.target.dataset.delete) { // Отслеживание кликов по кнопам "Удалить товар из списка"
+
+        Swal.fire({
+            title: 'Внимание!',
+            text: 'Вы действительно хотите удалить товар?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Да',
+            cancelButtonText: 'Отмена',
+        }).then((result) => {
+            if (result.isConfirmed) {
+                for (let i = 0; i < goods.length; i++) {
+                    if (goods[i][0] === e.target.dataset.delete) {
+                        goods.splice(i, 1);
+                    }
                 }
+
+                setLocalStorage(goods);
+                updateGoods();
+
+                Swal.fire (
+                    "Удалено!",
+                    "Выбранный товар был успешно удален",
+                    "success"
+                )
             }
+        })
+    } else if (e.target.dataset.goods) { // Отслеживание кликов по кнопкам "Добавить товар в корзину"
 
-            setLocalStorage(goods);
-            updateGoods();
-
-            Swal.fire (
-                "Удалено!",
-                "Выбранный товар был успешно удален",
-                "success"
-            )
-        }
-    })
-})
-
-// --- Отслеживание кликов по кнопкам "Добавить товар в корзину" ---
-
-tbodyList.addEventListener('click', (e) => {
-    if (!e.target.dataset.goods) {
-        return;
-    }
-
-    for (let i = 0; i < goods.length; i++) {
-        if (goods[i][3] > 0 && goods[i][0] === e.target.dataset.goods) {
-            goods[i].splice(3, 1, goods[i][3] - 1); // уменьшит количество товаров в магазине на 1
-            goods[i].splice(4, 1, goods[i][4] + 1); // увеличит количество товаров в корзине на 1
-            setLocalStorage(goods);
-            updateGoods();
+        for (let i = 0; i < goods.length; i++) {
+            if (goods[i][3] > 0 && goods[i][0] === e.target.dataset.goods) {
+                goods[i].splice(3, 1, goods[i][3] - 1); // уменьшит количество товаров в магазине на 1
+                goods[i].splice(4, 1, goods[i][4] + 1); // увеличит количество товаров в корзине на 1
+                setLocalStorage(goods);
+                updateGoods();
+            }
         }
     }
-})
+});
 
 // --- Отслеживание кликов по кнопкам "Удалить товар из корзины" ---
 
@@ -271,7 +273,7 @@ tbodyCart.addEventListener('input', (e) => {
 
 // --- Отслеживание кликов по заголовкам таблиц для сортировки ---
 
-table1.onclick = (e) => {
+tableLeft.onclick = (e) => {
     if (e.target.tagName !== 'TH') return; // если клик не по элементу заголовка таблицы, то ничего не делать
     let th = e.target;
     sortTable(th.cellIndex, th.dataset.type, 'table1');
@@ -279,12 +281,10 @@ table1.onclick = (e) => {
     // тип данных из data-type="..." в HTML и id
 }
 
-table2.onclick = (e) => {
+tableRight.onclick = (e) => {
     if (e.target.tagName !== 'TH') return;
     let th = e.target;
     sortTable(th.cellIndex, th.dataset.type, 'table2');
-    // передаваемые атрибуты: HTMLTableCellElement (позиция ячейки в столбце таблицы),
-    // тип данных из data-type="..." в HTML и id
 }
 
 updateGoods();
